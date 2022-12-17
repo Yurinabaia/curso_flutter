@@ -16,6 +16,7 @@ void main() {
   var aut;
   var httpClient;
   var url;
+  var params;
 
   //Separando Arange Act Assert
   setUp(() {
@@ -23,44 +24,37 @@ void main() {
     httpClient = HttpClientSpy();
     url = faker.internet.httpUrl();
     aut = RemoteAuthentication(httpClient: httpClient, url: url);
+    params = AuthenticationParams(
+        email: faker.internet.email(), password: faker.internet.password());
   });
 
   test('Should call HttpClient with current values', () async {
-    //Arrange
-    final email = faker.internet.email();
-    final password = faker.internet.password();
-
     // act
-    await aut.auth(AuthenticationParams(email: email, password: password));
+    await aut.auth(params);
     // assert
     verify(httpClient.request(
       url: url,
       method: 'post',
       body: {
-        'email': email,
-        'password': password,
+        'email': params.email,
+        'password': params.password,
       },
     ));
   });
 
   test('Should throw UnexpectedErro if Http client return 400', () async {
-    //Arrange
-    final email = faker.internet.email();
-    final password = faker.internet.password();
-
     //Mocando uma exceção
     when(httpClient.request(
       url: url,
       method: 'post',
       body: {
-        'email': email,
-        'password': password,
+        'email': params.email,
+        'password': params.password,
       },
     )).thenThrow(HttpError.badRequest);
 
     // act
-    final future =
-        aut.auth(AuthenticationParams(email: email, password: password));
+    final future = aut.auth(params);
 
     // assert
     expect(future, throwsA(DomainError.unexpected));
