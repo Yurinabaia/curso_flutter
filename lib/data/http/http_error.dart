@@ -5,4 +5,5 @@ enum HttpError {
   unauthorized,
   forbidden,
   noConnection,
+  invalidData
 }

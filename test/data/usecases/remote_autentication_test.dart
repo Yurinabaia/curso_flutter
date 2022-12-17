@@ -143,4 +143,23 @@ void main() {
     // assert
     expect(account.token, accountToken);
   });
+
+  test(
+      'Should throw UnexpectedErro if Http client return 200 with data invalid',
+      () async {
+    when(httpClient.request(
+      url: url,
+      method: 'post',
+      body: {
+        'email': params.email,
+        'password': params.password,
+      },
+    )).thenAnswer((_) async => {'invalid_key': 'invalid_value'});
+
+    // act
+    final future = aut.auth(params);
+
+    // assert
+    expect(future, throwsA(DomainError.unexpected));
+  });
 }
