@@ -59,4 +59,59 @@ void main() {
     // assert
     expect(future, throwsA(DomainError.unexpected));
   });
+
+  test('Should throw UnexpectedErro if Http client return 404', () async {
+    //Mocando uma exceção
+    when(httpClient.request(
+      url: url,
+      method: 'post',
+      body: {
+        'email': params.email,
+        'password': params.password,
+      },
+    )).thenThrow(HttpError.notFound);
+
+    // act
+    final future = aut.auth(params);
+
+    // assert
+    expect(future, throwsA(DomainError.unexpected));
+  });
+
+  test('Should throw UnexpectedErro if Http client return 500', () async {
+    //Mocando uma exceção
+    when(httpClient.request(
+      url: url,
+      method: 'post',
+      body: {
+        'email': params.email,
+        'password': params.password,
+      },
+    )).thenThrow(HttpError.serverError);
+
+    // act
+    final future = aut.auth(params);
+
+    // assert
+    expect(future, throwsA(DomainError.unexpected));
+  });
+
+  test('Should throw InvalidCrendicialsError if Http client return 401',
+      () async {
+    //Mocando uma exceção
+    when(httpClient.request(
+      url: url,
+      method: 'post',
+      body: {
+        'email': params.email,
+        'password': params.password,
+      },
+    )).thenThrow(HttpError.unauthorized);
+
+    // act
+    final future = aut.auth(params);
+
+    // assert
+    expect(future, throwsA(DomainError.invalidCredentials));
+  });
 }
