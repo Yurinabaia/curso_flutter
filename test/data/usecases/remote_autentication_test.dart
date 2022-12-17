@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 import 'package:faker/faker.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -21,11 +23,19 @@ abstract class HttpClient {
 class HttpClientSpy extends Mock implements HttpClient {}
 
 void main() {
-  test('Should call HttpClient with current values', () async {
+  var aut;
+  var httpClient;
+  var url;
+
+  //Separando Arange Act Assert
+  setUp(() {
     // arrange
-    final httpClient = HttpClientSpy();
-    final url = faker.internet.httpUrl();
-    final aut = RemoteAuthentication(httpClient: httpClient, url: url);
+    httpClient = HttpClientSpy();
+    url = faker.internet.httpUrl();
+    aut = RemoteAuthentication(httpClient: httpClient, url: url);
+  });
+
+  test('Should call HttpClient with current values', () async {
     // act
     await aut.auth();
     // assert
