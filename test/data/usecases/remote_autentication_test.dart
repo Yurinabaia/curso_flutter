@@ -9,19 +9,19 @@ class RemoteAuthentication {
   RemoteAuthentication({required this.httpClient, required this.url});
 
   auth() async {
-    await httpClient.request(url: url);
+    await httpClient.request(url: url, method: 'post');
   }
 }
 
 abstract class HttpClient {
-  request({required String url});
+  request({required String url, required String method});
 }
 
 //Mockar classe concreta para classe abstrata
 class HttpClientSpy extends Mock implements HttpClient {}
 
 void main() {
-  test('Should call HttpClient with current URL', () async {
+  test('Should call HttpClient with current values', () async {
     // arrange
     final httpClient = HttpClientSpy();
     final url = faker.internet.httpUrl();
@@ -29,6 +29,6 @@ void main() {
     // act
     await aut.auth();
     // assert
-    verify(httpClient.request(url: url));
+    verify(httpClient.request(url: url, method: 'post'));
   });
 }
