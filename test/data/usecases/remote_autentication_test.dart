@@ -18,6 +18,23 @@ void main() {
   var url;
   var params;
 
+  PostExpectation mockRequest() => when(httpClient.request(
+        url: url,
+        method: 'post',
+        body: {
+          'email': params.email,
+          'password': params.password,
+        },
+      ));
+
+  void mockHttpData(Map data) {
+    mockRequest().thenAnswer((_) async => data);
+  }
+
+  void mockHttpError(HttpError error) {
+    mockRequest().thenThrow(error);
+  }
+
   //Separando Arange Act Assert
   setUp(() {
     // Arrange global
@@ -29,15 +46,9 @@ void main() {
   });
 
   test('Should call HttpClient with current values', () async {
-    when(httpClient.request(
-      url: url,
-      method: 'post',
-      body: {
-        'email': params.email,
-        'password': params.password,
-      },
-    )).thenAnswer((_) async =>
+    mockHttpData(
         {'accessToken': faker.guid.guid(), 'name': faker.person.name()});
+
     // act
     await aut.auth(params);
     // assert
@@ -53,14 +64,7 @@ void main() {
 
   test('Should throw UnexpectedErro if Http client return 400', () async {
     //Mocando uma exceção
-    when(httpClient.request(
-      url: url,
-      method: 'post',
-      body: {
-        'email': params.email,
-        'password': params.password,
-      },
-    )).thenThrow(HttpError.badRequest);
+    mockHttpError(HttpError.badRequest);
 
     // act
     final future = aut.auth(params);
@@ -71,14 +75,7 @@ void main() {
 
   test('Should throw UnexpectedErro if Http client return 404', () async {
     //Mocando uma exceção
-    when(httpClient.request(
-      url: url,
-      method: 'post',
-      body: {
-        'email': params.email,
-        'password': params.password,
-      },
-    )).thenThrow(HttpError.notFound);
+    mockHttpError(HttpError.notFound);
 
     // act
     final future = aut.auth(params);
@@ -89,14 +86,7 @@ void main() {
 
   test('Should throw UnexpectedErro if Http client return 500', () async {
     //Mocando uma exceção
-    when(httpClient.request(
-      url: url,
-      method: 'post',
-      body: {
-        'email': params.email,
-        'password': params.password,
-      },
-    )).thenThrow(HttpError.serverError);
+    mockHttpError(HttpError.serverError);
 
     // act
     final future = aut.auth(params);
@@ -108,14 +98,7 @@ void main() {
   test('Should throw InvalidCrendicialsError if Http client return 401',
       () async {
     //Mocando uma exceção
-    when(httpClient.request(
-      url: url,
-      method: 'post',
-      body: {
-        'email': params.email,
-        'password': params.password,
-      },
-    )).thenThrow(HttpError.unauthorized);
+    mockHttpError(HttpError.unauthorized);
 
     // act
     final future = aut.auth(params);
@@ -126,16 +109,7 @@ void main() {
 
   test('Should return and Account if Http client return 200', () async {
     final accountToken = faker.guid.guid();
-
-    when(httpClient.request(
-      url: url,
-      method: 'post',
-      body: {
-        'email': params.email,
-        'password': params.password,
-      },
-    )).thenAnswer((_) async =>
-        {'accessToken': accountToken, 'name': faker.person.name()});
+    mockHttpData({'accessToken': accountToken, 'name': faker.person.name()});
 
     // act
     final account = await aut.auth(params);
@@ -147,14 +121,7 @@ void main() {
   test(
       'Should throw UnexpectedErro if Http client return 200 with data invalid',
       () async {
-    when(httpClient.request(
-      url: url,
-      method: 'post',
-      body: {
-        'email': params.email,
-        'password': params.password,
-      },
-    )).thenAnswer((_) async => {'invalid_key': 'invalid_value'});
+    mockHttpData({'invalid_key': 'invalid_value'});
 
     // act
     final future = aut.auth(params);
