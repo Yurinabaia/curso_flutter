@@ -1,7 +1,4 @@
-import 'dart:html';
-
-import 'package:curso_flutter/domain/entities/account_entity.dart';
-
+import '../../domain/helpers/helpers.dart';
 import '../../domain/usercases/usercases.dart';
 
 import '../http/http.dart';
@@ -15,7 +12,11 @@ class RemoteAuthentication {
   auth(AuthenticationParams authenticationParams) async {
     final body =
         RemoteAuthenticationParams.fromDomain(authenticationParams).toJson();
-    await httpClient.request(url: url, method: 'post', body: body);
+    try {
+      await httpClient.request(url: url, method: 'post', body: body);
+    } on HttpError {
+      throw DomainError.unexpected;
+    }
   }
 }
 
