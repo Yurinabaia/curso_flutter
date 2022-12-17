@@ -5,24 +5,8 @@ import 'package:test/test.dart';
 
 import 'package:curso_flutter/domain/usercases/usercases.dart';
 
-class RemoteAuthentication {
-  final HttpClient httpClient;
-  final String url;
-
-  RemoteAuthentication({required this.httpClient, required this.url});
-
-  auth(AuthenticationParams authenticationParams) async {
-    final body = {
-      'email': authenticationParams.email,
-      'password': authenticationParams.password,
-    };
-    await httpClient.request(url: url, method: 'post', body: body);
-  }
-}
-
-abstract class HttpClient {
-  request({required String url, required String method, Map body});
-}
+import 'package:curso_flutter/data/http/http_client.dart';
+import 'package:curso_flutter/data/usecases/usecases.dart';
 
 //Mockar classe concreta para classe abstrata
 class HttpClientSpy extends Mock implements HttpClient {}
