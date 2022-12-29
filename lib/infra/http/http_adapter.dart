@@ -14,12 +14,14 @@ class HttpAdapter implements HttpClient {
       'accept': 'application/json',
     };
     final bodyFormat = body != null ? jsonEncode(body) : null;
-
-    final response = await client.post(
-      Uri.http(url, ''),
-      headers: headers,
-      body: bodyFormat,
-    );
+    late Response response = Response('', 500);
+    if (method == 'post') {
+      response = await client.post(
+        Uri.http(url, ''),
+        headers: headers,
+        body: bodyFormat,
+      );
+    }
     return _handleResponse(response);
   }
 

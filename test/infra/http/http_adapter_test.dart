@@ -62,6 +62,15 @@ void main() {
     sut = HttpAdapter(client);
     url = faker.internet.httpUrl().split("//")[1];
   });
+  group('invalidMethod', () {
+    test('Should call get with correct values', () async {
+      // act
+      var future = sut.request(url: url, method: 'invalid_method');
+      // assert
+      expect(future, throwsA(HttpError.serverError));
+    });
+  });
+
   group('post', () {
     test('Should call post with correct values', () async {
       // act
@@ -114,6 +123,7 @@ void main() {
       // assert
       expect(future, throwsA(HttpError.forbidden));
     });
+
     test('Should call return erro 404', () async {
       // act
       final future =
