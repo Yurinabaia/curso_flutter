@@ -15,13 +15,18 @@ class HttpAdapter implements HttpClient {
     };
     final bodyFormat = body != null ? jsonEncode(body) : null;
     late Response response = Response('', 500);
-    if (method == 'post') {
-      response = await client.post(
-        Uri.http(url, ''),
-        headers: headers,
-        body: bodyFormat,
-      );
+    try {
+      if (method == 'post') {
+        response = await client.post(
+          Uri.http(url, ''),
+          headers: headers,
+          body: bodyFormat,
+        );
+      }
+    } catch (error) {
+      throw HttpError.serverError;
     }
+
     return _handleResponse(response);
   }
 
