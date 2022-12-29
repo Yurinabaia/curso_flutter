@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:curso_flutter/data/http/http.dart';
+import 'package:curso_flutter/infra/http/http.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart';
@@ -36,32 +36,6 @@ class ClientSpy extends Mock implements Client {
       {Map<String, String>? headers, body, Encoding? encoding}) async {
     return Response('{"any_key": "any_value"}', 200);
   }
-}
-
-class HttpAdapter implements HttpClient {
-  final Client client;
-  @override
-  Future<Map> request(
-      {required String url, required String method, Map? body}) async {
-    final headers = {
-      'content-type': 'application/json',
-      'accept': 'application/json',
-    };
-    final bodyFormat = body != null ? jsonEncode(body) : null;
-
-    final response = await client.post(
-      Uri.http(url, ''),
-      headers: headers,
-      body: bodyFormat,
-    );
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return response.body.isEmpty ? {} : jsonDecode(response.body);
-    } else {
-      throw HttpError.serverError;
-    }
-  }
-
-  HttpAdapter(this.client);
 }
 
 void main() {
