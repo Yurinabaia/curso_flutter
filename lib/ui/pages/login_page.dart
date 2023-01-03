@@ -1,5 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import '../components/components.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -9,9 +10,10 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Image.asset("lib/ui/assets/logo.png"),
-            Text("Login".toUpperCase()),
+            const LoginHeaderWidget(),
+            const HeadLineOneWidget(text: "Login"),
             Form(
               key: null,
               child: Column(
@@ -19,26 +21,39 @@ class LoginPage extends StatelessWidget {
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: "Email",
-                      icon: Icon(Icons.email),
+                      icon: Icon(
+                        Icons.email,
+                        color: Theme.of(context).primaryColor,
+                      ),
                     ),
                     keyboardType: TextInputType.emailAddress,
                   ),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: "Senha",
-                      icon: Icon(Icons.lock),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                      bottom: 32,
                     ),
-                    keyboardType: TextInputType.visiblePassword,
-                    obscureText: true,
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: "Senha",
+                        icon: Icon(
+                          Icons.lock,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      keyboardType: TextInputType.visiblePassword,
+                      obscureText: true,
+                    ),
                   ),
+                  const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () {},
-                    child: Text("Entrar"),
+                    child: const Text("ENTRAR"),
                   ),
                   TextButton.icon(
                     icon: const Icon(Icons.person),
                     onPressed: () {},
-                    label: Text("Criar conta"),
+                    label: const Text("Criar conta"),
                   ),
                 ],
               ),
