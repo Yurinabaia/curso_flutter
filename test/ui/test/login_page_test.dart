@@ -15,15 +15,17 @@ void main() {
   StreamController<String>? passwordErrorController =
       StreamController<String>();
   StreamController<bool>? isFormValidController = StreamController<bool>();
+  StreamController<bool>? isLoadingController = StreamController<bool>();
 
   Future<void> loadPage(WidgetTester tester) async {
     //Criando mocker para o presenter
     presenter = LoginPresenterSpy();
 
-    //Criando stream para o emailErrorStream, passwordErrorStream e isFormValidStream
+    //Criando stream para o emailErrorStream, passwordErrorStream, isFormValidStream e isLoadingStream
     emailErrorController = StreamController<String>();
     passwordErrorController = StreamController<String>();
     isFormValidController = StreamController<bool>();
+    isLoadingController = StreamController<bool>();
 
     //Mockando o emailErrorStream e passwordErrorController para retornar o stream criado
     when(presenter.emailErrorStream)
@@ -35,6 +37,10 @@ void main() {
     //mockando o isFormValidStream para retornar true
     when(presenter.isFormValidStream)
         .thenAnswer((_) => isFormValidController?.stream);
+
+    //mockando o isLoadingStream para retornar false
+    when(presenter.isLoadingStream)
+        .thenAnswer((_) => isLoadingController?.stream);
 
     //Primeiro devemos encapsular o widget que queremos testar em uma função
     //Neste caso usar o MaterialApp para que o widget seja renderizado
@@ -52,52 +58,54 @@ void main() {
     emailErrorController?.close();
     passwordErrorController?.close();
     isFormValidController?.close();
+    isLoadingController?.close();
   });
 
-  testWidgets(
-    'Should load with correct initial state',
-    (WidgetTester tester) async {
-      await loadPage(tester);
+  testWidgets('Should load with correct initial state',
+      (WidgetTester tester) async {
+    await loadPage(tester);
 
-      //Act
-      //Assert
-      //Buscando os filhos do widget com o semanticsLabel 'Email'
-      //Neste teste ele esta procurando todos os filhos de Email que seja Text
-      final emailTextChildren = find.descendant(
-        of: find.bySemanticsLabel('Email'),
+    //Act
+    //Assert
+    //Buscando os filhos do widget com o semanticsLabel 'Email'
+    //Neste teste ele esta procurando todos os filhos de Email que seja Text
+    final emailTextChildren = find.descendant(
+      of: find.bySemanticsLabel('Email'),
+      matching: find.byType(Text),
+    );
+
+    //Verificando se o widget Text com o texto 'Email' está na tela
+    //reason: é uma mensagem que será exibida caso o teste falhe
+    expect(
+      emailTextChildren,
+      findsOneWidget,
+      reason:
+          'Quando um TextFormField possui apenas um filho texto, significa que não possui erros, pois um dos filhos é sempre o texto do rótulo',
+    );
+
+    //Verificando se widget Text com o texto passowrd está na tela
+    expect(
+      find.descendant(
+        of: find.bySemanticsLabel('Senha'),
         matching: find.byType(Text),
-      );
+      ),
+      findsOneWidget,
+      reason:
+          'Quando um TextFormField possui apenas um filho texto, significa que não possui erros, pois um dos filhos é sempre o texto do rótulo',
+    );
 
-      //Verificando se o widget Text com o texto 'Email' está na tela
-      //reason: é uma mensagem que será exibida caso o teste falhe
-      expect(
-        emailTextChildren,
-        findsOneWidget,
-        reason:
-            'Quando um TextFormField possui apenas um filho texto, significa que não possui erros, pois um dos filhos é sempre o texto do rótulo',
-      );
+    final button = tester.widget<ElevatedButton>(
+      find.byType(ElevatedButton),
+    );
+    //Verificando se o widget ElevatedButton está na tela
+    expect(
+      button.onPressed,
+      null,
+    );
 
-      //Verificando se widget Text com o texto passowrd está na tela
-      expect(
-        find.descendant(
-          of: find.bySemanticsLabel('Senha'),
-          matching: find.byType(Text),
-        ),
-        findsOneWidget,
-        reason:
-            'Quando um TextFormField possui apenas um filho texto, significa que não possui erros, pois um dos filhos é sempre o texto do rótulo',
-      );
-
-      final button = tester.widget<ElevatedButton>(
-        find.byType(ElevatedButton),
-      );
-      //Verificando se o widget ElevatedButton está na tela
-      expect(
-        button.onPressed,
-        null,
-      );
-    },
-  );
+    //loading não deve ser exibido
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
 
   testWidgets('Should call validate with correct values',
       (WidgetTester tester) async {
@@ -162,7 +170,7 @@ void main() {
     await loadPage(tester);
 
     //Act
-    //Preenchendo o campo email com um email inválido
+    //Habilitando o botão do submit
     isFormValidController?.add(true);
     await tester.pump();
 
@@ -182,7 +190,7 @@ void main() {
     await loadPage(tester);
 
     //Act
-    //Preenchendo o campo email com um email inválido
+    //Desabilitando o botão do submit
     isFormValidController?.add(false);
     await tester.pump();
 
@@ -196,5 +204,48 @@ void main() {
       null,
       reason: 'Botão deve ser desabilitado quando o formulário for inválido',
     );
+  });
+  testWidgets('Should call authentication on form submit',
+      (WidgetTester tester) async {
+    await loadPage(tester);
+
+    //Act
+    //Habilitando o botão do submit
+    isFormValidController?.add(true);
+    await tester.pump();
+
+    //Assert
+    final button = tester.widget<ElevatedButton>(
+      find.byType(ElevatedButton),
+    );
+
+    await tester.pump();
+    verifyNever(presenter.auth()).called(0);
+  });
+
+  testWidgets('Should present loading on form submit',
+      (WidgetTester tester) async {
+    await loadPage(tester);
+
+    //Act
+    //Habilitando o botão do submit
+    isLoadingController?.add(true);
+    await tester.pump();
+
+    //Assert
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  });
+  testWidgets('Should hide loading', (WidgetTester tester) async {
+    await loadPage(tester);
+
+    //Act
+    //Habilitando o botão do submit
+    isLoadingController?.add(true);
+    await tester.pump();
+    isLoadingController?.add(false);
+    await tester.pump();
+
+    //Assert
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 }
