@@ -18,17 +18,16 @@ void main() {
   StreamController<bool>? isFormValidController = StreamController<bool>();
   StreamController<bool>? isLoadingController = StreamController<bool>();
 
-  Future<void> loadPage(WidgetTester tester) async {
-    //Criando mocker para o presenter
-    presenter = LoginPresenterSpy();
-
+  void inicializedStreams() {
     //Criando stream para o emailErrorStream, passwordErrorStream, isFormValidStream isLoadingStream e mainErrorStream
     emailErrorController = StreamController<String>();
     passwordErrorController = StreamController<String>();
     mainErrorController = StreamController<String>();
     isFormValidController = StreamController<bool>();
     isLoadingController = StreamController<bool>();
+  }
 
+  void inicializedMocker() {
     //Mockando o emailErrorStream e passwordErrorController para retornar o stream criado
     when(presenter.emailErrorStream)
         .thenAnswer((_) => emailErrorController?.stream);
@@ -47,6 +46,21 @@ void main() {
     //mockando o mainErrorStream para retornar o stream criado
     when(presenter.mainErrorStream)
         .thenAnswer((_) => mainErrorController?.stream);
+  }
+
+  void closeStreams() {
+    emailErrorController?.close();
+    passwordErrorController?.close();
+    mainErrorController?.close();
+    isFormValidController?.close();
+    isLoadingController?.close();
+  }
+
+  Future<void> loadPage(WidgetTester tester) async {
+    //Criando mocker para o presenter
+    presenter = LoginPresenterSpy();
+    inicializedStreams();
+    inicializedMocker();
 
     //Primeiro devemos encapsular o widget que queremos testar em uma função
     //Neste caso usar o MaterialApp para que o widget seja renderizado
@@ -61,11 +75,7 @@ void main() {
   }
 
   tearDown(() {
-    emailErrorController?.close();
-    passwordErrorController?.close();
-    mainErrorController?.close();
-    isFormValidController?.close();
-    isLoadingController?.close();
+    closeStreams();
   });
 
   testWidgets('Should load with correct initial state',
