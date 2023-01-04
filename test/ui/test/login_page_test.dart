@@ -1,20 +1,35 @@
+import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:curso_flutter/ui/pages/pages.dart';
+import 'package:mockito/mockito.dart';
+
+class LoginPresenterSpy extends Mock implements LoginPresenter {}
 
 void main() {
+  LoginPresenter presenter = LoginPresenterSpy();
+
+  Future<void> loadPage(WidgetTester tester) async {
+    //Criando mocker para o presenter
+    presenter = LoginPresenterSpy();
+
+    //Primeiro devemos encapsular o widget que queremos testar em uma função
+    //Neste caso usar o MaterialApp para que o widget seja renderizado
+    //Avarage
+    final loginPage = MaterialApp(
+      home: LoginPage(presenter: presenter),
+    );
+
+    //Agora podemos usar o tester para renderizar o widget
+    //Arange
+    await tester.pumpWidget(loginPage);
+  }
+
   testWidgets(
     'Should load with correct initial state',
     (WidgetTester tester) async {
-      //Primeiro devemos encapsular o widget que queremos testar em uma função
-      //Neste caso usar o MaterialApp para que o widget seja renderizado
-      //Avarage
-      const loginPage = MaterialApp(home: LoginPage());
-
-      //Agora podemos usar o tester para renderizar o widget
-      //Arange
-      await tester.pumpWidget(loginPage);
+      await loadPage(tester);
 
       //Act
       //Assert
@@ -55,4 +70,23 @@ void main() {
       );
     },
   );
+
+  testWidgets('Should call validate with correct values',
+      (WidgetTester tester) async {
+    await loadPage(tester);
+    final email = faker.internet.email();
+    final password = faker.internet.password();
+
+    //Act
+    //Preenchendo o campo email
+    await tester.enterText(find.bySemanticsLabel('Email'), email);
+    //Preenchendo o campo senha
+    await tester.enterText(find.bySemanticsLabel('Senha'), password);
+    //Clicando no botão
+    await tester.tap(find.byType(ElevatedButton));
+
+    //Assert
+    verify(presenter.validateEmail(email));
+    verify(presenter.validatePassword(password));
+  });
 }

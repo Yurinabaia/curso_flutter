@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:curso_flutter/ui/pages/login_page.dart';
+import 'package:curso_flutter/ui/pages/login/login_page.dart';
 
 class App extends StatelessWidget {
   const App({super.key});

@@ -1,10 +1,11 @@
+import 'package:curso_flutter/ui/pages/pages.dart';
 import 'package:flutter/material.dart';
 
-import '../components/components.dart';
+import '../../components/components.dart';
 
 class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
-
+  final LoginPresenter? presenter;
+  const LoginPage({super.key, this.presenter});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,6 +28,7 @@ class LoginPage extends StatelessWidget {
                       ),
                     ),
                     keyboardType: TextInputType.emailAddress,
+                    onChanged: presenter?.validateEmail,
                   ),
                   Padding(
                     padding: const EdgeInsets.only(
@@ -42,6 +44,7 @@ class LoginPage extends StatelessWidget {
                         ),
                       ),
                       keyboardType: TextInputType.visiblePassword,
+                      onChanged: presenter?.validatePassword,
                       obscureText: true,
                     ),
                   ),
