@@ -14,6 +14,7 @@ void main() {
   StreamController<String>? emailErrorController = StreamController<String>();
   StreamController<String>? passwordErrorController =
       StreamController<String>();
+  StreamController<String>? mainErrorController = StreamController<String>();
   StreamController<bool>? isFormValidController = StreamController<bool>();
   StreamController<bool>? isLoadingController = StreamController<bool>();
 
@@ -21,9 +22,10 @@ void main() {
     //Criando mocker para o presenter
     presenter = LoginPresenterSpy();
 
-    //Criando stream para o emailErrorStream, passwordErrorStream, isFormValidStream e isLoadingStream
+    //Criando stream para o emailErrorStream, passwordErrorStream, isFormValidStream isLoadingStream e mainErrorStream
     emailErrorController = StreamController<String>();
     passwordErrorController = StreamController<String>();
+    mainErrorController = StreamController<String>();
     isFormValidController = StreamController<bool>();
     isLoadingController = StreamController<bool>();
 
@@ -42,6 +44,10 @@ void main() {
     when(presenter.isLoadingStream)
         .thenAnswer((_) => isLoadingController?.stream);
 
+    //mockando o mainErrorStream para retornar o stream criado
+    when(presenter.mainErrorStream)
+        .thenAnswer((_) => mainErrorController?.stream);
+
     //Primeiro devemos encapsular o widget que queremos testar em uma função
     //Neste caso usar o MaterialApp para que o widget seja renderizado
     //Avarage
@@ -57,6 +63,7 @@ void main() {
   tearDown(() {
     emailErrorController?.close();
     passwordErrorController?.close();
+    mainErrorController?.close();
     isFormValidController?.close();
     isLoadingController?.close();
   });
@@ -247,5 +254,31 @@ void main() {
 
     //Assert
     expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('main error', (WidgetTester tester) async {
+    await loadPage(tester);
+
+    //Act
+    // exibindo o erro principal
+    mainErrorController?.add('main error');
+    await tester.pump();
+
+    //Assert
+    //Encontra algum componente com o texto main error
+    expect(find.text('main error'), findsOneWidget);
+  });
+
+  testWidgets('Should close streams on dispose', (WidgetTester tester) async {
+    await loadPage(tester);
+    //Act
+    //dispose é um método do presenter
+    presenter.dispose();
+
+    //Assert
+    verify(presenter.dispose()).called(1);
+    addTearDown(() {
+      presenter.dispose();
+    });
   });
 }
