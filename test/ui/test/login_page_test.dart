@@ -12,17 +12,23 @@ class LoginPresenterSpy extends Mock implements LoginPresenter {}
 void main() {
   LoginPresenter presenter = LoginPresenterSpy();
   StreamController<String>? emailErrorController = StreamController<String>();
+  StreamController<String>? passwordErrorController =
+      StreamController<String>();
 
   Future<void> loadPage(WidgetTester tester) async {
     //Criando mocker para o presenter
     presenter = LoginPresenterSpy();
 
-    //Criando stream para o emailErrorStream
+    //Criando stream para o emailErrorStream e passwordErrorStream
     emailErrorController = StreamController<String>();
+    passwordErrorController = StreamController<String>();
 
-    //Mockando o emailErrorStream para retornar o stream criado
+    //Mockando o emailErrorStream e passwordErrorController para retornar o stream criado
     when(presenter.emailErrorStream)
         .thenAnswer((_) => emailErrorController?.stream);
+
+    when(presenter.passwordErrorStream)
+        .thenAnswer((_) => passwordErrorController?.stream);
 
     //Primeiro devemos encapsular o widget que queremos testar em uma função
     //Neste caso usar o MaterialApp para que o widget seja renderizado
@@ -38,6 +44,7 @@ void main() {
 
   tearDown(() {
     emailErrorController?.close();
+    passwordErrorController?.close();
   });
 
   testWidgets(
@@ -124,23 +131,23 @@ void main() {
     );
   });
 
-  // testWidgets('Should present error if email is invalid',
-  //     (WidgetTester tester) async {
-  //   await loadPage(tester);
+  testWidgets('Should present error if passoword is invalid',
+      (WidgetTester tester) async {
+    await loadPage(tester);
 
-  //   //Act
-  //   //Preenchendo o campo email com um email inválido
-  //   await tester.enterText(find.bySemanticsLabel('Email'), 'email_invalido');
-  //   //Clicando no botão
-  //   await tester.tap(find.byType(ElevatedButton));
+    //Act
+    //Preenchendo o campo email com um email inválido
+    passwordErrorController?.add('Campo obrigatório');
 
-  //   //Assert
-  //   //Verificando se o widget Text com o texto 'Campo obrigatório' está na tela
-  //   expect(
-  //     find.text('Campo obrigatório'),
-  //     findsOneWidget,
-  //     reason:
-  //         'Quando um TextFormField possui apenas um filho texto, significa que não possui erros, pois um dos filhos é sempre o texto do rótulo',
-  //   );
-  // });
+    //PUMP é o método que faz o widget ser renderizado na tela
+    await tester.pump();
+
+    //Assert
+    expect(
+      find.text('Campo obrigatório'),
+      findsOneWidget,
+      reason:
+          'Erro esperado deve ser apresentado na tela quando o email é inválido',
+    );
+  });
 }
