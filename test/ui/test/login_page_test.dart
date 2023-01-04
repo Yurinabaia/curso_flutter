@@ -14,14 +14,16 @@ void main() {
   StreamController<String>? emailErrorController = StreamController<String>();
   StreamController<String>? passwordErrorController =
       StreamController<String>();
+  StreamController<bool>? isFormValidController = StreamController<bool>();
 
   Future<void> loadPage(WidgetTester tester) async {
     //Criando mocker para o presenter
     presenter = LoginPresenterSpy();
 
-    //Criando stream para o emailErrorStream e passwordErrorStream
+    //Criando stream para o emailErrorStream, passwordErrorStream e isFormValidStream
     emailErrorController = StreamController<String>();
     passwordErrorController = StreamController<String>();
+    isFormValidController = StreamController<bool>();
 
     //Mockando o emailErrorStream e passwordErrorController para retornar o stream criado
     when(presenter.emailErrorStream)
@@ -29,6 +31,10 @@ void main() {
 
     when(presenter.passwordErrorStream)
         .thenAnswer((_) => passwordErrorController?.stream);
+
+    //mockando o isFormValidStream para retornar true
+    when(presenter.isFormValidStream)
+        .thenAnswer((_) => isFormValidController?.stream);
 
     //Primeiro devemos encapsular o widget que queremos testar em uma função
     //Neste caso usar o MaterialApp para que o widget seja renderizado
@@ -45,6 +51,7 @@ void main() {
   tearDown(() {
     emailErrorController?.close();
     passwordErrorController?.close();
+    isFormValidController?.close();
   });
 
   testWidgets(
@@ -148,6 +155,46 @@ void main() {
       findsOneWidget,
       reason:
           'Erro esperado deve ser apresentado na tela quando o email é inválido',
+    );
+  });
+  testWidgets('Should enable button if form is valid',
+      (WidgetTester tester) async {
+    await loadPage(tester);
+
+    //Act
+    //Preenchendo o campo email com um email inválido
+    isFormValidController?.add(true);
+    await tester.pump();
+
+    //Assert
+    final button = tester.widget<ElevatedButton>(
+      find.byType(ElevatedButton),
+    );
+
+    expect(
+      button.onPressed,
+      isNotNull,
+      reason: 'Botão deve ser habilitado quando o formulário for válido',
+    );
+  });
+  testWidgets('Should disable button if form is not valid',
+      (WidgetTester tester) async {
+    await loadPage(tester);
+
+    //Act
+    //Preenchendo o campo email com um email inválido
+    isFormValidController?.add(false);
+    await tester.pump();
+
+    //Assert
+    final button = tester.widget<ElevatedButton>(
+      find.byType(ElevatedButton),
+    );
+
+    expect(
+      button.onPressed,
+      null,
+      reason: 'Botão deve ser desabilitado quando o formulário for inválido',
     );
   });
 }

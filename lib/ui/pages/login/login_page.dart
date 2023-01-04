@@ -19,7 +19,7 @@ class LoginPage extends StatelessWidget {
               key: null,
               child: Column(
                 children: <Widget>[
-                  StreamBuilder<Object>(
+                  StreamBuilder<String>(
                       stream: presenter?.emailErrorStream,
                       builder: (context, snapshot) {
                         return TextFormField(
@@ -40,7 +40,7 @@ class LoginPage extends StatelessWidget {
                       top: 8,
                       bottom: 32,
                     ),
-                    child: StreamBuilder<Object>(
+                    child: StreamBuilder<String>(
                         stream: presenter?.passwordErrorStream,
                         builder: (context, snapshot) {
                           return TextFormField(
@@ -59,10 +59,14 @@ class LoginPage extends StatelessWidget {
                         }),
                   ),
                   const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: null,
-                    child: const Text("ENTRAR"),
-                  ),
+                  StreamBuilder<bool>(
+                      stream: presenter?.isFormValidStream,
+                      builder: (context, snapshot) {
+                        return ElevatedButton(
+                          onPressed: snapshot.data == true ? () {} : null,
+                          child: const Text("ENTRAR"),
+                        );
+                      }),
                   TextButton.icon(
                     icon: const Icon(Icons.person),
                     onPressed: () {},
