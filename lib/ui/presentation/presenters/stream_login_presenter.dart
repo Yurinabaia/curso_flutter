@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:curso_flutter/domain/usercases/autentication.dart';
+
 import '../protocols/protocols.dart';
 
 class LoginState {
@@ -19,6 +21,7 @@ class LoginState {
 
 class StreamLoginPresenter {
   final Validation validation;
+  final Authentication authentication;
   //broadcast permite que mais de um listener possa ouvir o mesmo stream
   final _controller = StreamController<LoginState>.broadcast();
   //Distinc deixa apenas um valor passar e não dois iguais.
@@ -33,7 +36,8 @@ class StreamLoginPresenter {
 
   final _state = LoginState();
 
-  StreamLoginPresenter({required this.validation});
+  StreamLoginPresenter(
+      {required this.validation, required this.authentication});
 
   void update() => _controller.add(_state);
 
@@ -48,5 +52,10 @@ class StreamLoginPresenter {
     _state.passwordError =
         validation.validate(field: 'password', value: password);
     update();
+  }
+
+  Future<void> auth() async {
+    await authentication.auth(
+        AuthenticationParams(email: _state.email, password: _state.password));
   }
 }
