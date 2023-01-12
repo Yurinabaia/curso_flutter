@@ -1,8 +1,8 @@
-import 'package:curso_flutter/domain/helpers/helpers.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import 'package:curso_flutter/domain/helpers/helpers.dart';
 import 'package:curso_flutter/domain/usercases/usercases.dart';
 import 'package:curso_flutter/domain/entities/entities.dart';
 
@@ -170,5 +170,11 @@ void main() {
     expectLater(sut.isLoadingStream, emitsInOrder([true, false]));
     sut.mainErrorStream.listen(expectAsync1((error) => expect(error, null)));
     await sut.auth();
+  });
+
+  test('Should not emit after dispose', () async {
+    expectLater(sut.emailErrorStream, neverEmits(null));
+    sut.dispose();
+    sut.validateEmail(email);
   });
 }

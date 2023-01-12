@@ -24,7 +24,9 @@ class StreamLoginPresenter {
   final Validation validation;
   final Authentication authentication;
   //broadcast permite que mais de um listener possa ouvir o mesmo stream
-  final _controller = StreamController<LoginState>.broadcast();
+  var _controller = StreamController<LoginState>.broadcast();
+  final _state = LoginState();
+
   //Distinc deixa apenas um valor passar e não dois iguais.
   Stream<String?> get emailErrorStream =>
       _controller.stream.map((state) => state.emailError).distinct();
@@ -40,7 +42,6 @@ class StreamLoginPresenter {
 
   Stream<bool> get isLoadingStream =>
       _controller.stream.map((state) => state.isLoading == true).distinct();
-  final _state = LoginState();
 
   StreamLoginPresenter(
       {required this.validation, required this.authentication});
@@ -72,5 +73,10 @@ class StreamLoginPresenter {
       _state.mainError = error.description;
     }
     update();
+  }
+
+  void dispose() {
+    _controller.close();
+    _controller = StreamController<LoginState>.broadcast();
   }
 }
