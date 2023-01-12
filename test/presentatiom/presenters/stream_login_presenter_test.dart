@@ -151,8 +151,19 @@ void main() {
         .called(1);
   });
 
-  test('Should emit correct event on Authentication sucess', () async {
+  test('Should emit correct event on Authentication InvalidCredential',
+      () async {
     mockAuthenticationError(DomainError.invalidCredentials);
+    sut.validateEmail(email);
+    sut.validatePassword(password);
+
+    expectLater(sut.isLoadingStream, emitsInOrder([true, false]));
+    sut.mainErrorStream.listen(expectAsync1((error) => expect(error, null)));
+    await sut.auth();
+  });
+
+  test('Should emit correct event on Authentication UnexpectedError', () async {
+    mockAuthenticationError(DomainError.unexpected);
     sut.validateEmail(email);
     sut.validatePassword(password);
 
