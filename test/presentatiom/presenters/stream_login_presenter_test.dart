@@ -1,3 +1,4 @@
+import 'package:curso_flutter/domain/helpers/helpers.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -20,6 +21,8 @@ void main() {
   String email = "";
   String password = "";
 
+  PostExpectation mockAuthenticationCall() => when(authentication.auth(null));
+
   PostExpectation mockValidationCall(String? field) => when(validation.validate(
       field: field ?? anyNamed('field'), value: anyNamed('value')));
 
@@ -27,7 +30,9 @@ void main() {
     mockValidationCall(field).thenReturn(value);
   }
 
-  PostExpectation mockAuthenticationCall() => when(authentication.auth(null));
+  void mockAuthenticationError(DomainError error) {
+    mockAuthenticationCall().thenThrow(error);
+  }
 
   void mockAuthentication() {
     mockAuthenticationCall()
@@ -147,11 +152,12 @@ void main() {
   });
 
   test('Should emit correct event on Authentication sucess', () async {
+    mockAuthenticationError(DomainError.invalidCredentials);
     sut.validateEmail(email);
     sut.validatePassword(password);
 
     expectLater(sut.isLoadingStream, emitsInOrder([true, false]));
-
+    sut.mainErrorStream.listen(expectAsync1((error) => expect(error, null)));
     await sut.auth();
   });
 }
